@@ -1,6 +1,5 @@
 streamlit==1.45.1 # Ou la version exacte que vous utilisez localement si différente
 pandas==2.3.0    # Version de pandas présente dans vos logs d'installation
 numpy==2.3.0     # Version de numpy présente dans vos logs d'installation
-matplotlib==3.9.0 # Une version récente et stable
-seaborn==0.13.2  # Une version récente et stable
+plotly
 scikit-learn==1.5.0 # Une version récente et stable
