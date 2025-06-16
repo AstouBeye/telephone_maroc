@@ -1,50 +1,75 @@
 import pandas as pd
 import matplotlib.pyplot as plt
 import seaborn as sns
+import streamlit as st
 from sklearn.linear_model import LinearRegression
 from sklearn.model_selection import train_test_split
 from sklearn.metrics import mean_squared_error, r2_score
 
-# Charger les données
+# Chargement des données
 df = pd.read_csv("telephones_maroc.csv")
+
+# Titre de l'application
+st.title("📊 Régression Linéaire : Prix des Téléphones au Maroc")
+
+# Affichage du dataset
+if st.checkbox("Afficher les données brutes"):
+    st.write(df)
 
 # Sélection des variables
 X = df[['Stockage_interne', 'Charge_rapide', 'Autonomie_batterie']]
 y = df['Prix']
 
-# Vérification des valeurs manquantes
+# Traitement des données manquantes
 if X.isnull().sum().sum() > 0 or y.isnull().sum() > 0:
-    print("⚠️ Données manquantes détectées. Veuillez nettoyer les données avant de continuer.")
-    exit()
+    st.error("⚠️ Données manquantes détectées. Veuillez les corriger.")
+    st.stop()
 
-# Séparation en données d'entraînement et de test
+# Séparation train/test
 X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.2, random_state=42)
 
-# Création du modèle
+# Modèle
 model = LinearRegression()
 model.fit(X_train, y_train)
-
-# Prédiction
 y_pred = model.predict(X_test)
 
-# Évaluation du modèle
+# Évaluation
 mse = mean_squared_error(y_test, y_pred)
 r2 = r2_score(y_test, y_pred)
 
-# Affichage des résultats
-print("📊 Régression Linéaire Multiple")
-print(f"Coefficients : {model.coef_}")
-print(f"Intercept : {model.intercept_}")
-print(f"Erreur quadratique moyenne (RMSE) : {mse ** 0.5:.2f}")
-print(f"Coefficient de détermination (R²) : {r2:.2f}")
+st.subheader("🧮 Résultats de la régression")
+st.write(f"**RMSE :** {mse ** 0.5:.2f}")
+st.write(f"**R² :** {r2:.2f}")
+st.write(f"**Intercept :** {model.intercept_:.2f}")
+st.write("**Coefficients :**")
+coeffs = pd.DataFrame({
+    'Variable': X.columns,
+    'Coefficient': model.coef_
+})
+st.table(coeffs)
 
-# Affichage graphique : prix réel vs prédit
-plt.figure(figsize=(8, 6))
-sns.scatterplot(x=y_test, y=y_pred)
-plt.xlabel("Prix Réel")
-plt.ylabel("Prix Prédit")
-plt.title("Prix Réel vs Prix Prédit")
-plt.plot([y.min(), y.max()], [y.min(), y.max()], 'r--')
-plt.grid(True)
-plt.tight_layout()
-plt.show()
+# Visualisation du prix réel vs prédit
+st.subheader("📈 Graphique : Prix réel vs Prix prédit")
+fig, ax = plt.subplots()
+sns.scatterplot(x=y_test, y=y_pred, ax=ax)
+ax.plot([y.min(), y.max()], [y.min(), y.max()], 'r--')
+ax.set_xlabel("Prix Réel")
+ax.set_ylabel("Prix Prédit")
+ax.set_title("Prix Réel vs Prix Prédit")
+st.pyplot(fig)
+
+# Section prédiction interactive
+st.subheader("🔍 Prédiction du prix d’un téléphone")
+
+stockage = st.slider("Stockage Interne (Go)", 32, 512, 128, step=32)
+charge = st.selectbox("Charge Rapide", [0, 1])
+autonomie = st.slider("Autonomie Batterie (heures)", 10, 72, 36)
+
+donnees = pd.DataFrame([{
+    'Stockage_interne': stockage,
+    'Charge_rapide': charge,
+    'Autonomie_batterie': autonomie
+}])
+
+prix_pred = model.predict(donnees)[0]
+st.success(f"💰 Prix estimé : {prix_pred:.2f} MAD")
