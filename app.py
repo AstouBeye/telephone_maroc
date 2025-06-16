@@ -93,3 +93,4 @@ with col4:
         st.plotly_chart(fig_scatter, use_container_width=True)
     else:
         st.info("Colonnes 'Prix' ou 'Stockage_interne' manquantes.")
+
