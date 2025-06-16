@@ -1,0 +1,14 @@
+# __pycache__ et fichiers compilés
+__pycache__/
+*.py[cod]
+
+# Environnement virtuel
+venv/
+.env/
+
+# Logs
+*.log
+
+# IDEs
+.vscode/
+.idea/
